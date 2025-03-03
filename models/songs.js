@@ -15,7 +15,8 @@ const Song = db.model("Song", {
         type: Date,
         default: Date.now
     },
-    genre: [String]
+    genre: [String],
+    username: String
 });
 
 module.exports = Song;

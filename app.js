@@ -32,6 +32,52 @@ router.post("/user", async (req, res) => {
     }
 });
 
+// Login
+router.post("/auth", async (req, res) => {
+    if (!req.body.username || !req.body.password) {
+        res.status(400).json({error: "Missing username or password"});
+        return
+    }
+    let user = await User.findOne({username: req.body.username});
+    try{
+        if (!user) {
+            res.status(400).send(err); 
+        } else if (!user) {
+            res.status(401).json({error: "User not found"});
+        } else {
+            if (user.password != req.body.password) {
+                res.status(401).json({error: "Incorrect password"});
+            } else {
+                username2 = user.username;
+                const token = jwt.encode({username: user.username}, secret);
+                const auth = 1;
+                res.json({
+                    username2,
+                    token:token,
+                    auth:auth
+                });
+            }
+        }
+    } catch (err) {
+        res.status(400).json({error: "User not found"});
+    }
+});
+
+// Check user status by token
+router.get("/status", async (req, res) => {
+    if (!req.headers["x-auth"]) {
+        return res.status(401).json({error: "Missing X-Auth header"});
+    }
+    const token = req.headers["x-auth"];
+    try {
+        const decoded = jwt.decode(token, secret);
+        let users = User.find({}, "username staus");
+        res.json(users);
+    } catch (ex) {
+        res.status(401).json({error: "Invalid JWT"});
+    }
+});
+
 // GET all songs in a database
 router.get("/songs", async (req, res) => {
 
